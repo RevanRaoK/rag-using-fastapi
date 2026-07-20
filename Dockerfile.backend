@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+# Install system dependencies required for OpenCV/PyTesseract/MuPDF
+RUN apt-get update && apt-get install -y \
+  tesseract-ocr \
+  libtesseract-dev \
+  gcc \
+  g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy and install python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download NLTK data needed for text processing
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
+
+# Copy application files
+COPY . .
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Command to run FastAPI server
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
