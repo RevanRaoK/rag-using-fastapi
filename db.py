@@ -63,14 +63,13 @@ class FileChunk(Base):
   chunk_id = Column(Integer, primary_key=True)
   file_id = Column(Integer, ForeignKey('files.file_id'))
   chunk_text = Column(Text)
-  embedding_vector = Column(Vector(2560))
+  embedding_vector = Column(Vector(1536))
 
 # Safe database initialization
 try:
   with engine.begin() as connection:
     connection.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
-    # Alter column dimension if table already exists with old 1536 dimension
-    connection.execute(text('ALTER TABLE "file-chunks" ALTER COLUMN embedding_vector TYPE vector(2560)'))
+    connection.execute(text('ALTER TABLE "file-chunks" ALTER COLUMN embedding_vector TYPE vector(1536)'))
   Base.metadata.create_all(engine)
   print("Database tables initialized successfully")
 except Exception as e:

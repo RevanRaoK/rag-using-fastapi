@@ -86,8 +86,8 @@ async def upload_file(file: UploadFile, background_tasks: BackgroundTasks, db: S
 # Function to get similar chunks
 async def get_similar_chunks(file_id: int, question: str, db: Session):
   try:
-    # Create embeddings for the question (assuming client and embedding creation logic)
-    response = client.embeddings.create(input=question, model='perplexity/pplx-embed-v1-4b')
+    # Create embeddings for the question
+    response = client.embeddings.create(input=question, model='text-embedding-3-small')
     question_embedding = response.data[0].embedding
 
     similar_chunks_query = (
