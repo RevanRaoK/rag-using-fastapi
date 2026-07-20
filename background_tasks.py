@@ -5,6 +5,7 @@ import nltk
 from nltk.tokenize import sent_tokenize
 from openai import OpenAI
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
@@ -35,7 +36,7 @@ class TextProcessor:
       # Create embeddings
       response = client.embeddings.create(
         input = chunk,
-        model = 'nvidia/nemotron-3-embed-1b:free'
+        model = 'perplexity/pplx-embed-v1-4b'
       )
 
       embeddings = response.data[0].embedding
