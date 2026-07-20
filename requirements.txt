@@ -11,3 +11,6 @@ SQLAlchemy
 SQLAlchemy-Utils
 pgvector
 psycopg2-binary
+nltk
+streamlit
+requests
