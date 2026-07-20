@@ -1,3 +1,5 @@
+from platform import processor
+import background_tasks
 from fastapi import (FastAPI, UploadFile, HTTPException, Depends, BackgroundTasks)
 import os
 from pydantic import BaseModel
@@ -74,7 +76,7 @@ async def upload_file(file: UploadFile, background_tasks: BackgroundTasks, db: S
     db.refresh(db_file)
 
     # Trigger background chunking and embedding
-    processor = TextProcessor(db=db, file_id=db_file.file_id)
+    processor = TextProcessor(file_id=db_file.file_id)
     background_tasks.add_task(processor.chunk_and_embed, parsed_text)
 
     return {"info": "File saved and processing started!", "file_id": db_file.file_id, "filename": file.filename}
@@ -116,7 +118,14 @@ async def ask_question(request: AskModel, db: Session = Depends(get_db)):
     context = " ".join(context_texts)
 
     # update the system message with the context
-    system_message = f"You are a helpful assistant. Here is the context  to use to reply to questions: {context}"
+    # update the system message with the context
+    system_message = (
+        "You are an expert AI assistant answering questions about an uploaded document. "
+        "Use ONLY the following extracted context to answer the question. "
+        "If the context does not contain enough information to answer, state clearly "
+        "what information is available or that the context does not specify it.\n\n"
+        f"Context:\n{context}"
+    )
 
     # Make the OpenAI API  call with the updated context
     response = client.chat.completions.create(
