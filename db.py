@@ -21,7 +21,7 @@ if DATABASE_URL:
 else:
   POSTGRES_USERNAME = os.getenv("POSTGRES_USERNAME", "postgres")
   POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "mysecretpassword")
-  POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+  POSTGRES_HOST = os.getenv("POSTGRES_HOST", "db")
   POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
   DATABASE_NAME = os.getenv("DATABASE_NAME", "rag_db")
   
@@ -63,14 +63,15 @@ class FileChunk(Base):
   chunk_id = Column(Integer, primary_key=True)
   file_id = Column(Integer, ForeignKey('files.file_id'))
   chunk_text = Column(Text)
-  embedding_vector = Column(Vector(1536))
+  embedding_vector = Column(Vector(2560))
 
-# Ensure the vector extension is enabled
-with engine.begin() as connection:
-  connection.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
-
+# Safe database initialization
 try:
-  # Create tables
+  with engine.begin() as connection:
+    connection.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
+    # Alter column dimension if table already exists with old 1536 dimension
+    connection.execute(text('ALTER TABLE "file-chunks" ALTER COLUMN embedding_vector TYPE vector(2560)'))
   Base.metadata.create_all(engine)
+  print("Database tables initialized successfully")
 except Exception as e:
-  print(f"Error creating tables: {e}")
+  print(f"Warning: Database initialization info: {e}")
