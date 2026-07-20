@@ -10,22 +10,34 @@ import os
 
 load_dotenv()
 
-# Database Credentials
-POSTGRES_USERNAME = os.getenv("POSTGRES_USERNAME")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-encoded_password = urllib.parse.quote_plus(POSTGRES_PASSWORD)
+# Database Credentials & URL
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+  # Cloud providers (like Railway/Render/Heroku) often use postgres:// instead of postgresql://
+  if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+  database_url = DATABASE_URL
+else:
+  POSTGRES_USERNAME = os.getenv("POSTGRES_USERNAME", "postgres")
+  POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "mysecretpassword")
+  POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+  POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+  DATABASE_NAME = os.getenv("DATABASE_NAME", "rag_db")
+  
+  encoded_password = urllib.parse.quote_plus(POSTGRES_PASSWORD)
+  database_url = f"postgresql://{POSTGRES_USERNAME}:{encoded_password}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATABASE_NAME}"
 
 # Create the engine for the specific database
-database_url = f"postgresql://{POSTGRES_USERNAME}:{encoded_password}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATABASE_NAME}"
 engine = create_engine(database_url)
 
 # Check and create the database
-if not database_exists(engine.url):
-  create_database(engine.url)
-  print("Database created successfully")
+try:
+  if not database_exists(engine.url):
+    create_database(engine.url)
+    print("Database created successfully")
+except Exception as e:
+  print(f"Database exist check skipped: {e}")
 
 # Session local
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

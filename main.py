@@ -1,5 +1,3 @@
-from platform import processor
-import background_tasks
 from fastapi import (FastAPI, UploadFile, HTTPException, Depends, BackgroundTasks)
 import os
 from pydantic import BaseModel
