@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+openai
+PyPDF2
+pytesseract
+Pillow
+pymupdf
+SQLAlchemy
+SQLAlchemy-Utils
+pgvector
+psycopg2-binary
